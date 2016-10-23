@@ -1,39 +1,59 @@
-# PHP Dockerized
+# PHP DockerStack
+> from the initial project by [Kasper Kronborg Isager](http://github.com/kasperisager/php-dockerized)
+>
+> Dockerized PHP development stack: Nginx, MySQL, PHP-FPM, HHVM, Memcached
 
-> Dockerized PHP development stack: Nginx, MySQL, MongoDB, PHP-FPM, HHVM, Memcached, Redis, Elasticsearch and RabbitMQ
+[![Build Status](https://travis-ci.org/fstasi/php-dockerstack.svg)](https://travis-ci.org/fstasi/php-dockerstack)
 
-[![Build Status](https://travis-ci.org/kasperisager/php-dockerized.svg)](https://travis-ci.org/kasperisager/php-dockerized)
+PHP DockerStack provides you a full environment to run your php applications backed by already-configured nginx and MySql.
 
-PHP Dockerized gives you everything you need for developing PHP applications locally. The idea came from the need of having an OS-agnostic and virtualized alternative to the great [MNPP](https://github.com/jyr/MNPP) stack as regular LAMP stacks quite simply can't keep up with the Nginx + PHP-FPM/HHVM combo in terms of performance. I hope you'll find it as useful an addition to your dev-arsenal as I've found it!
+This stack is already configured to run all the application you put in the www folder, just follow the naming convention and you will be all set.
+
 
 ## What's inside
 
 * [Nginx](http://nginx.org/)
 * [MySQL](http://www.mysql.com/)
-* [MongoDB](http://www.mongodb.org/)
 * [PHP-FPM](http://php-fpm.org/)
 * [HHVM](http://www.hhvm.com/)
 * [Memcached](http://memcached.org/)
-* [Redis](http://redis.io/)
-* [Elasticsearch](http://www.elasticsearch.org/)
-* [RabbitMQ](https://www.rabbitmq.com/)
 
 ## Requirements
 
-* [Docker Engine](https://docs.docker.com/installation/)
-* [Docker Compose](https://docs.docker.com/compose/)
-* [Docker Machine](https://docs.docker.com/machine/) (Mac and Windows only)
+* [Docker](https://docs.docker.com/installation/)
 
 ## Running
 
-Set up a Docker Machine and then run:
+Install Docker, then, modify the docker-compose.yml file in the root of this repo, setting `adminuser` and `adminpass` variables to be meaningful to you.
+
+
+Then run:
 
 ```sh
 $ docker-compose up
 ```
 
-That's it! You can now access your configured sites via the IP address of the Docker Machine or locally if you're running a Linux flavour and using Docker natively.
+That's it! You can now access your configured sites via http://localhost:8080/{sitename} or, if you deployed this online and you have the DNS configured already http://{sitename}
+
+
+## Adding a website
+
+If you want to run a website you own, just place it in the `www` directory that comes with this repo.
+The nginx in this stack is already configured to serve all virtualHosts, with a lookup rule based on the domain name.
+As an example, all the traffic coming form [www.]example.com will be routed to /var/www/example.com directory.
+
+### Adding a sub-domain (third level domain)
+
+Third level domains are also routed to sub-directories in the domain directory. For example, hello.example.com will be routed to /var/www/example.com/hello
+
+Yes, it's just that easy!
+
+
+## Initialise your MySQL Database
+
+Any *.sql or *.sql.gz file in the `db` directory will be used to initialise your mysql instance. That's it :)
+
 
 ## License
 
-Copyright &copy; 2014-2016 [Kasper Kronborg Isager](http://github.com/kasperisager). Licensed under the terms of the [MIT license](LICENSE.md).
+Copyright &copy; 2016-2017 [Francesco Stasi](http://github.com/fstasi). Licensed under the terms of the [MIT license](LICENSE.md).

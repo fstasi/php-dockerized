@@ -11,6 +11,10 @@ FROM nginx
 # Remove default nginx configs.
 RUN rm -f /etc/nginx/conf.d/*
 
+# Add Backports (needed for certbot)
+
+RUN sh -c "echo -n 'deb http://ftp.debian.org/debian jessie-backports main' >> /etc/apt/sources.list.d/backports.list"
+
 # Install packages
 RUN apt-get update && apt-get install -my \
   supervisor \
@@ -24,7 +28,8 @@ RUN apt-get update && apt-get install -my \
   php5-mcrypt \
   php5-sqlite \
   php5-xdebug \
-  php-apc
+  php-apc \
+  certbot -t jessie-backports
 
 # Ensure that PHP5 FPM is run as root.
 RUN sed -i "s/user = www-data/user = root/" /etc/php5/fpm/pool.d/www.conf
@@ -47,25 +52,37 @@ RUN apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0x5a16e728
 RUN echo deb http://dl.hhvm.com/debian jessie main | tee /etc/apt/sources.list.d/hhvm.list
 RUN apt-get update && apt-get install -y hhvm
 
+ARG adminuser
+ARG adminpass
+
+# Generate the password
+RUN sh -c "echo -n '$adminuser:' >> /etc/nginx/.htpasswd"
+RUN sh -c "openssl passwd -apr1 $adminpass >> /etc/nginx/.htpasswd"
+
 # Add configuration files
 COPY conf/nginx.conf /etc/nginx/
+COPY conf/default.vhost /etc/nginx/sites-enabled/default.vhost
 COPY conf/supervisord.conf /etc/supervisor/conf.d/
 COPY conf/php.ini /etc/php5/fpm/conf.d/40-custom.ini
+
+# Add ssl certificates
+COPY /ssl /etc/nginx/ssl
+RUN chmod -R 200 /etc/nginx/ssl
 
 ################################################################################
 # Volumes
 ################################################################################
 
-VOLUME ["/var/www", "/etc/nginx/conf.d"]
+#VOLUME ["/var/www"]
 
 ################################################################################
 # Ports
 ################################################################################
 
-EXPOSE 80 443 9000
+EXPOSE 80 8080 443
 
 ################################################################################
 # Entrypoint
 ################################################################################
 
-ENTRYPOINT ["/usr/bin/supervisord"]
+ENTRYPOINT supervisord -c /etc/supervisor/conf.d/supervisord.conf

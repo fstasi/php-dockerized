@@ -1,0 +1,145 @@
+## remove old-style www prefix and redirect everything to https
+server {
+  listen 80 default_server;
+  listen [::]:80 default_server;
+
+  server_name "~^www\.(?<dst>.*)$";
+
+  #return 301 https://$dest$request_uri;
+}
+
+server {
+  listen 8080; 
+
+  server_name localhost;
+
+  root /var/www/;
+  index index.php index.html index.htm;
+
+  # rewrite this path
+  rewrite ^/game$ /layout.php last;
+
+  location / {
+    try_files $uri $uri/ =404;
+    auth_basic "Restricted Content";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+  }
+  location /errorpages/ {
+    alias /var/www/errorpages/;
+    internal;
+  }  
+  location ~* (\.ini\.php)$ {
+    deny all;
+  }
+  location ~* \.(js|css|png|jpg|jpeg|gif|ico|html|htm)$ {
+    expires       -1;
+    log_not_found off;
+    access_log    off;
+  }
+  location ~ \.php$ {
+    try_files     $uri =404;
+    include       fastcgi_params;
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    # fastcgi_pass  unix:/var/run/php5-fpm.sock;
+    fastcgi_pass  unix:/var/run/hhvm/hhvm.sock;
+  }
+
+}
+
+## VHOSTS
+server {
+  listen 80;
+
+  server_name ~^((?<sub>.+)\.)?(?<domain>.+\..+)$;
+
+  root /var/www/$domain/$sub;
+  index index.php index.html index.htm;
+
+  # rewrite this path
+  rewrite ^/game$ /layout.php last;
+
+  #fastcgi_read_timeout 1800;
+
+  location /errorpages/ {
+    alias /var/www/errorpages/;
+    internal;
+  }  
+  location ~* (\.ini\.php)$ {
+    deny all;
+  }
+  location ~ /.well-known {
+    allow all;
+  }
+  location ~* \.(js|css|png|jpg|jpeg|gif|ico|html|htm)$ {
+    expires       max;
+    log_not_found off;
+    access_log    off;
+  }
+  location ~ \.php$ {
+    try_files     $uri =404;
+    include       fastcgi_params;
+    fastcgi_index index.php;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    # fastcgi_pass  unix:/var/run/php5-fpm.sock;
+    fastcgi_pass  unix:/var/run/hhvm/hhvm.sock;
+  }
+
+}
+
+## SSLs
+#server {
+#  listen 443 ssl http2;
+#  listen [::]:443 ssl http2;
+#
+#  server_name ~^((?<sub>.+)\.)?(?<domain>.+\..+)$;
+#
+#  ssl_certificate /etc/letsencrypt/live/$domain/fullchain.pem;
+#  ssl_certificate_key /etc/letsencrypt/live/$domain/privkey.pem;
+#
+#  #ssl_session_cache shared:SSL:20m;
+#  ssl_session_timeout 60m;
+#
+#  ssl_prefer_server_ciphers on;
+#
+#  ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DH+3DES:!ADH:!AECDH:!MD5;
+#
+#  ssl_dhparam /etc/ssl/certs/dhparam.pem;
+#
+#  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+#
+#  ssl_stapling on;
+#  ssl_stapling_verify on;
+#  add_header Strict-Transport-Security "max-age=31536000" always;
+#
+#  root /var/www/$domain/$sub;
+#  index index.php index.html index.htm;
+#
+#  # rewrite this path
+#  rewrite ^/game$ /layout.php last;
+#
+#  location /errorpages/ {
+#    alias /var/www/errorpages/;
+#    internal;
+#  }  
+#  location ~* (\.ini\.php)$ {
+#    deny all;
+#  }
+#  location ~ /.well-known {
+#    allow all;
+#  }
+#  location ~* \.(js|css|png|jpg|jpeg|gif|ico|html|htm)$ {
+#    expires       max;
+#    log_not_found off;
+#    access_log    off;
+#  }
+#  location ~ \.php$ {
+#    try_files     $uri =404;
+#    include       fastcgi_params;
+#    fastcgi_index index.php;
+#    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+#    # fastcgi_pass  unix:/var/run/php5-fpm.sock;
+#    fastcgi_pass  unix:/var/run/hhvm/hhvm.sock;
+#  }
+#
+#}
