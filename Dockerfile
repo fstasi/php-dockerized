@@ -17,6 +17,7 @@ RUN sh -c "echo -n 'deb http://ftp.debian.org/debian jessie-backports main' >> /
 
 # Install packages
 RUN apt-get update && apt-get install -my \
+  openssl \
   supervisor \
   curl \
   wget \
@@ -64,10 +65,6 @@ COPY conf/nginx.conf /etc/nginx/
 COPY conf/default.vhost /etc/nginx/sites-enabled/default.vhost
 COPY conf/supervisord.conf /etc/supervisor/conf.d/
 COPY conf/php.ini /etc/php5/fpm/conf.d/40-custom.ini
-
-# Add ssl certificates
-COPY /ssl /etc/nginx/ssl
-RUN chmod -R 200 /etc/nginx/ssl
 
 ################################################################################
 # Volumes
