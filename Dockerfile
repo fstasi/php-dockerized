@@ -8,6 +8,8 @@ FROM nginx
 # Build instructions
 ################################################################################
 
+ENV TERM xterm
+
 # Remove default nginx configs.
 RUN rm -f /etc/nginx/conf.d/*
 
@@ -17,6 +19,7 @@ RUN sh -c "echo -n 'deb http://ftp.debian.org/debian jessie-backports main' >> /
 
 # Install packages
 RUN apt-get update && apt-get install -my \
+  nano \
   openssl \
   supervisor \
   curl \
@@ -65,6 +68,9 @@ COPY conf/nginx.conf /etc/nginx/
 COPY conf/default.vhost /etc/nginx/sites-enabled/default.vhost
 COPY conf/supervisord.conf /etc/supervisor/conf.d/
 COPY conf/php.ini /etc/php5/fpm/conf.d/40-custom.ini
+
+# COPY ssl template certificate
+COPY ssl /etc/nginx/ssl
 
 ################################################################################
 # Volumes

@@ -53,6 +53,17 @@ Yes, it's just that easy!
 
 Any *.sql or *.sql.gz file in the `db` directory will be used to initialise your mysql instance. That's it :)
 
+## SSL
+
+Within the docker host (replace `example.com` and `your@email.com` with real ones!):
+```
+docker exec -d phpdockerstack_front_1 certbot certonly --webroot --agree-tos --text --non-interactive --email "your@email.com" -w /var/www/example.com -d example.com -d www.example.com
+
+docker exec -d phpdockerstack_front_1 cat /etc/nginx/ssl/template | sed 's/$ssldomain/example.com/g' > /etc/nginx/sites-enabled/example.com
+
+docker exec -d phpdockerstack_front_1 service nginx restart
+```
+
 
 ## License
 
