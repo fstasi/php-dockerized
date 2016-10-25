@@ -55,15 +55,13 @@ Any *.sql or *.sql.gz file in the `db` directory will be used to initialise your
 
 ## SSL
 
-Within the docker host (replace `example.com` and `your@email.com` with real ones!):
+The docker container created already supports the creation of SSL certificates, via the free and awesome [Let's Encrypt](https://letsencrypt.org/) project.
+
+To automatically get a certificate and configure nginx, just run the following command from you host's terminal (replace `example.com` and `your@email.com` with real ones!):
 ```
-docker exec -d phpdockerstack_front_1 certbot certonly --webroot --agree-tos --text --non-interactive --email "your@email.com" -w /var/www/example.com -d example.com -d www.example.com
+docker exec -d phpdockerstack_front_1 /etc/nginx/ssl/sslget example.com your@email.com
 
-docker exec -d phpdockerstack_front_1 cat /etc/nginx/ssl/template | sed 's/$ssldomain/example.com/g' > /etc/nginx/sites-enabled/example.com
-
-docker exec -d phpdockerstack_front_1 service nginx restart
 ```
-
 
 ## License
 

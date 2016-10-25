@@ -1,0 +1,22 @@
+#!/bin/bash
+
+domain=$1
+email=$2
+
+
+SUB_REGEX="^(.*)\.(.+\..+)"
+
+if [[ $domain =~ $SUB_REGEX ]];
+then
+    subdomain=${BASH_REMATCH[1]}
+    maindomain=${BASH_REMATCH[2]}
+else
+    subdomain=""
+    maindomain=$domain
+fi
+
+certbot certonly --webroot --agree-tos --text --non-interactive --email $email -w /var/www/$maindomain/$subdomain -d $domain -d www.$domain
+
+sed -e 's/{ssldomain}/'$domain'/g' -e 's/{subdomain}/'$subdomain'/g' -e 's/{maindomain}/'$maindomain'/g' /etc/nginx/ssl/template > /etc/nginx/sites-enabled/$domain
+
+nginx -s reload
