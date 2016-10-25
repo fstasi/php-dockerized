@@ -3,13 +3,8 @@ sudo: required
 services:
   - docker
 
-env:
-  DOCKER_COMPOSE_VERSION: 1.8.1
-
-before_install:
-  # Install Docker Compose
-  - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
-  - chmod +x /usr/local/bin/docker-compose
+before_script:
+  - travis_retry docker-compose run setup
 
 script:
   - docker-compose build
